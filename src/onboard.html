@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ValCrown — Setup</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg0:#080808;--bg1:#101010;--bg2:#181818;--bg3:#222;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text1:#f0f0f0;--text2:#888;--text3:#555;
+  --accent:#7c6aff;--accent2:#6254e0;--accent-dim:rgba(124,106,255,0.12);
+  --green:#22d47a;--red:#ff4d4d;--red-dim:rgba(255,77,77,0.1);
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg0);color:var(--text1);-webkit-font-smoothing:antialiased;overflow:hidden;}
+body{-webkit-app-region:drag;}
+.no-drag{-webkit-app-region:no-drag;}
+
+/* TITLEBAR */
+.tbar{height:36px;display:flex;align-items:center;justify-content:flex-end;padding:0 14px;gap:6px;position:fixed;top:0;left:0;right:0;z-index:10;}
+.wbtn{width:11px;height:11px;border-radius:50%;border:none;cursor:pointer;-webkit-app-region:no-drag;}
+.wbtn:hover{opacity:0.75;}
+.wbtn.close{background:#ff5f56;}.wbtn.min{background:#ffbd2e;}
+
+/* WRAPPER */
+.wrap{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 32px 24px;-webkit-app-region:no-drag;}
+
+/* STEPS INDICATOR */
+.steps{display:flex;align-items:center;gap:6px;margin-bottom:28px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--bg3);transition:all 0.3s;}
+.step-dot.active{background:var(--accent);width:24px;border-radius:4px;}
+.step-dot.done{background:var(--green);}
+
+/* LOGO */
+.logo{text-align:center;margin-bottom:24px;}
+.logo-ico{width:52px;height:52px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;margin:0 auto 10px;box-shadow:0 8px 32px rgba(124,106,255,0.3);}
+.logo h1{font-size:20px;font-weight:700;}
+.logo p{font-size:12px;color:var(--text2);margin-top:3px;}
+
+/* SCREEN */
+.screen{display:none;width:100%;max-width:380px;text-align:center;}
+.screen.active{display:block;}
+.screen-title{font-size:18px;font-weight:700;margin-bottom:6px;}
+.screen-sub{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+
+/* TABS */
+.tabs{display:flex;background:var(--bg2);border-radius:8px;padding:3px;margin-bottom:16px;gap:2px;}
+.tab{flex:1;height:32px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;background:none;color:var(--text2);}
+.tab.active{background:var(--bg3);color:var(--text1);}
+
+/* FORM */
+.form-grp{margin-bottom:10px;text-align:left;}
+.form-lbl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;display:block;}
+.inp{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;color:var(--text1);font-size:13px;outline:none;transition:border-color 0.15s;-webkit-app-region:no-drag;}
+.inp:focus{border-color:var(--accent);}
+.inp::placeholder{color:var(--text3);}
+
+/* BUTTONS */
+.btn-main{width:100%;height:44px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;margin-top:4px;}
+.btn-main:hover{background:var(--accent2);}
+.btn-main:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-ghost{width:100%;height:36px;background:none;border:1px solid var(--border2);border-radius:8px;font-size:13px;color:var(--text2);cursor:pointer;transition:all 0.15s;margin-top:6px;}
+.btn-ghost:hover{background:var(--bg3);color:var(--text1);}
+
+/* KEY INPUT */
+.key-inp{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;color:var(--accent);font-size:16px;font-weight:700;font-family:monospace;text-align:center;outline:none;letter-spacing:2px;transition:border-color 0.15s;}
+.key-inp:focus{border-color:var(--accent);}
+.key-inp::placeholder{color:var(--text3);font-size:13px;letter-spacing:0;font-weight:400;}
+
+/* ERROR */
+.err{background:var(--red-dim);border:1px solid rgba(255,77,77,0.2);color:var(--red);padding:8px 12px;border-radius:7px;font-size:12px;margin-bottom:10px;display:none;text-align:left;}
+.err.show{display:block;}
+
+/* SUCCESS */
+.success-ico{font-size:48px;margin-bottom:12px;}
+
+/* FEATURES LIST */
+.features{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;text-align:left;}
+.feature{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+.feature-ico{font-size:18px;flex-shrink:0;}
+.feature-name{font-size:13px;font-weight:600;}
+.feature-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+
+/* FOOTER */
+.footer{margin-top:12px;font-size:11px;color:var(--text3);}
+.footer a{color:var(--accent);text-decoration:none;cursor:pointer;}
+</style>
+<script src="js/gameDb.js"></script><script src="js/bridge.js"></script></head>
+<body>
+
+<div class="tbar">
+  <button class="wbtn min no-drag" onclick="window.valcrown.minimize()"></button>
+  <button class="wbtn close no-drag" onclick="window.valcrown.closeOnboard()"></button>
+</div>
+
+<div class="wrap">
+
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-ico">V</div>
+    <h1>ValCrown</h1>
+    <p>Gaming Optimizer — Setup</p>
+  </div>
+
+  <!-- Step dots -->
+  <div class="steps">
+    <div class="step-dot active" id="dot-0"></div>
+    <div class="step-dot" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+  </div>
+
+  <!-- SCREEN 0: Welcome -->
+  <div class="screen active" id="screen-0">
+    <div class="screen-title">Welcome to ValCrown</div>
+    <div class="screen-sub">The intelligent gaming optimizer that boosts your games automatically</div>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-ico">🎮</div>
+        <div>
+          <div class="feature-name">Auto Game Detection</div>
+          <div class="feature-sub">Detects 200+ games and boosts them automatically</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">⚡</div>
+        <div>
+          <div class="feature-name">One-Click Boost Engine</div>
+          <div class="feature-sub">Optimizes CPU, RAM, network instantly</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">🤖</div>
+        <div>
+          <div class="feature-name">AI-Powered Advisor</div>
+          <div class="feature-sub">Claude AI analyzes and fixes your system</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">🎯</div>
+        <div>
+          <div class="feature-name">Discord Presence</div>
+          <div class="feature-sub">Shows friends what you're boosting</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-main" onclick="goTo(1)">Get Started →</button>
+    <div class="footer">Already have an account? <a onclick="goTo(1)">Sign in</a></div>
+  </div>
+
+  <!-- SCREEN 1: Login / Signup -->
+  <div class="screen" id="screen-1">
+    <div class="screen-title">Create Account</div>
+    <div class="screen-sub">Sign in or create a free account to get started</div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
+      <button class="tab" id="tab-login" onclick="switchTab('login')">Sign In</button>
+    </div>
+
+    <div id="err-auth" class="err"></div>
+
+    <div id="signup-form">
+      <div class="form-grp">
+        <label class="form-lbl">Full Name</label>
+        <input class="inp" type="text" id="s-name" placeholder="Your name" />
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Email Address</label>
+        <input class="inp" type="email" id="s-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Password</label>
+        <input class="inp" type="password" id="s-pass" placeholder="Min 8 characters" />
+      </div>
+      <button class="btn-main" onclick="doSignup()">Create Account</button>
+    </div>
+
+    <div id="login-form" style="display:none;">
+      <div class="form-grp">
+        <label class="form-lbl">Email Address</label>
+        <input class="inp" type="email" id="l-email" placeholder="you@example.com" />
+      </div>
+      <div class="form-grp">
+        <label class="form-lbl">Password</label>
+        <input class="inp" type="password" id="l-pass" placeholder="Your password" onkeypress="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="btn-main" onclick="doLogin()">Sign In</button>
+    </div>
+
+    <div class="footer" style="margin-top:10px;">
+      <a onclick="window.valcrown.openExternal('https://valcrown.com/pricing')">Don't have a license? Buy one →</a>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Redeem Key -->
+  <div class="screen" id="screen-2">
+    <div class="screen-title">Activate Your License</div>
+    <div class="screen-sub">Enter your ValCrown license key to activate the app on this device</div>
+
+    <div id="err-key" class="err"></div>
+
+    <div class="form-grp" style="text-align:left;">
+      <label class="form-lbl">License Key</label>
+      <input class="key-inp" type="text" id="key-inp" placeholder="VC-XXXX-XXXX-XXXX"
+        oninput="formatKey(this)" onkeypress="if(event.key==='Enter')doRedeemKey()" />
+    </div>
+
+    <button class="btn-main" onclick="doRedeemKey()" style="margin-top:12px;">Activate License</button>
+    <button class="btn-ghost" onclick="window.valcrown.openExternal('https://valcrown.com/pricing')">Buy a License Key</button>
+
+    <div class="footer" style="margin-top:10px;">
+      Key format: VC-XXXXXXXX-XXXXXXXX-XXXXXXXX
+    </div>
+  </div>
+
+  <!-- SCREEN 3: All Done -->
+  <div class="screen" id="screen-3">
+    <div class="success-ico">🚀</div>
+    <div class="screen-title">You're all set!</div>
+    <div class="screen-sub">ValCrown is activated and ready. It will automatically detect your games and boost performance.</div>
+    <div class="features" style="margin-top:16px;">
+      <div class="feature">
+        <div class="feature-ico">✅</div>
+        <div>
+          <div class="feature-name">Account Created</div>
+          <div class="feature-sub" id="done-email">--</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">✅</div>
+        <div>
+          <div class="feature-name">License Activated</div>
+          <div class="feature-sub" id="done-plan">Pro Plan — Active</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-ico">✅</div>
+        <div>
+          <div class="feature-name">Device Bound</div>
+          <div class="feature-sub">This PC is now linked to your license</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-main" onclick="finishOnboard()">Open ValCrown Dashboard →</button>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/deviceId.js"></script>
+<script>
+let authData = null; // stores login result
+
+// ── NAVIGATION ──
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach((s, i) => {
+    s.classList.toggle('active', i === screen);
+  });
+  document.querySelectorAll('.step-dot').forEach((d, i) => {
+    d.classList.remove('active', 'done');
+    if (i < screen) d.classList.add('done');
+    else if (i === screen) d.classList.add('active');
+  });
+}
+
+function switchTab(tab) {
+  document.getElementById('signup-form').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  clearErr('err-auth');
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function clearErr(id) {
+  document.getElementById(id)?.classList.remove('show');
+}
+
+// ── SIGNUP ──
+async function doSignup() {
+  clearErr('err-auth');
+  const name = document.getElementById('s-name').value.trim();
+  const email = document.getElementById('s-email').value.trim();
+  const pass = document.getElementById('s-pass').value;
+
+  if (!name || !email || !pass) { showErr('err-auth', 'Please fill in all fields.'); return; }
+  if (pass.length < 8) { showErr('err-auth', 'Password must be at least 8 characters.'); return; }
+
+  await API.init();
+  const res = await API.request('POST', '/api/auth/register', { email, password: pass, fullName: name });
+
+  if (res.ok) {
+    // Auto login after signup
+    await doLoginWithCredentials(email, pass);
+  } else {
+    showErr('err-auth', res.data.error || 'Signup failed. Try again.');
+  }
+}
+
+// ── LOGIN ──
+async function doLogin() {
+  clearErr('err-auth');
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  if (!email || !pass) { showErr('err-auth', 'Please enter email and password.'); return; }
+  await doLoginWithCredentials(email, pass);
+}
+
+async function doLoginWithCredentials(email, password) {
+  await API.init();
+  const deviceVid = await DeviceID.get();
+  const res = await API.login(email, password, deviceVid);
+
+  if (res.ok) {
+    authData = res.data;
+    // Check if already has license
+    if (res.data.license) {
+      // Has license — skip key screen
+      setDoneScreen(res.data);
+      goTo(3);
+    } else {
+      goTo(2);
+    }
+  } else {
+    const code = res.data.code;
+    if (code === 'NO_LICENSE') {
+      // Login worked but no license — go to key redemption
+      authData = res.data;
+      goTo(2);
+    } else if (code === 'DEVICE_MISMATCH') {
+      showErr('err-auth', 'This license is activated on another device. Contact support@valcrown.com.');
+    } else if (res.status === 401) {
+      showErr('err-auth', 'Wrong email or password.');
+    } else {
+      showErr('err-auth', res.data.error || 'Login failed.');
+    }
+  }
+}
+
+// ── KEY REDEMPTION ──
+function formatKey(inp) {
+  let val = inp.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (val.startsWith('VC')) {
+    let parts = [];
+    if (val.length > 2) parts.push(val.substring(0, 2));
+    if (val.length > 2) parts.push(val.substring(2, 10));
+    if (val.length > 10) parts.push(val.substring(10, 18));
+    if (val.length > 18) parts.push(val.substring(18, 26));
+    inp.value = parts.join('-');
+  }
+}
+
+async function doRedeemKey() {
+  clearErr('err-key');
+  const key = document.getElementById('key-inp').value.trim().toUpperCase();
+  if (!key || key.length < 10) { showErr('err-key', 'Please enter a valid license key.'); return; }
+
+  await API.init();
+  // Try logging in again with the key — backend validates it
+  // If authData exists, use stored token to validate
+  const deviceVid = await DeviceID.get();
+
+  // Re-login to activate key binding with this device
+  const email = document.getElementById('l-email')?.value ||
+                document.getElementById('s-email')?.value || '';
+
+  if (!email && !authData) {
+    showErr('err-key', 'Please go back and sign in first.');
+    return;
+  }
+
+  // Call a dedicated key redemption endpoint
+  const token = authData?.accessToken;
+  const res = await fetch(`${await window.valcrown.getApiUrl()}/api/auth/redeem-key`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ licenseKey: key, deviceVid }),
+  });
+
+  const data = await res.json();
+
+  if (res.ok) {
+    authData = { ...authData, ...data };
+    setDoneScreen(authData);
+    goTo(3);
+  } else {
+    showErr('err-key', data.error || 'Invalid or already used license key.');
+  }
+}
+
+function setDoneScreen(data) {
+  const emailEl = document.getElementById('done-email');
+  const planEl = document.getElementById('done-plan');
+  if (emailEl && data.user) emailEl.textContent = data.user.email;
+  if (planEl && data.license) planEl.textContent = (data.license.plan || 'Pro') + ' Plan — Active';
+}
+
+// ── FINISH ──
+function finishOnboard() {
+  if (!authData) return;
+  window.valcrown.onboardComplete({
+    accessToken: authData.accessToken,
+    refreshToken: authData.refreshToken,
+    user: authData.user,
+    license: authData.license,
+  });
+}
+
+// Init API
+API.init().catch(() => {});
+</script>
+</body>
+</html>

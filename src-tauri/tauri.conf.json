@@ -1,0 +1,40 @@
+{
+  "productName": "ValCrown",
+  "version": "1.0.0",
+  "identifier": "com.xogamesltd.valcrown",
+  "build": {
+    "frontendDist": "../src"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "ValCrown",
+        "width": 1100,
+        "height": 720,
+        "minWidth": 900,
+        "minHeight": 600,
+        "center": true,
+        "decorations": false,
+        "resizable": true,
+        "backgroundColor": "#07070f"
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.png", "icons/icon.ico"],
+    "publisher": "XOGAMESLTD",
+    "copyright": "Copyright © 2026 XOGAMESLTD",
+    "category": "Utility",
+    "windows": {
+      "nsis": {
+        "languages": ["English"],
+        "installMode": "perMachine"
+      }
+    }
+  }
+}

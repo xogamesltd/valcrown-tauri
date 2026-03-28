@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ValCrown — Login</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { -webkit-app-region: drag; }
+    .login-container { -webkit-app-region: no-drag; }
+    .titlebar-mini {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 32px;
+      -webkit-app-region: drag;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 12px;
+      gap: 6px;
+      z-index: 100;
+    }
+    .titlebar-mini .titlebar-btn { -webkit-app-region: no-drag; }
+  </style>
+</head>
+<body>
+
+<div class="titlebar-mini">
+  <button class="titlebar-btn minimize" onclick="window.valcrown.minimize()"></button>
+  <button class="titlebar-btn close" onclick="window.valcrown.close()"></button>
+</div>
+
+<div class="login-container">
+
+  <div class="login-logo">
+    <div class="logo-big">V</div>
+    <h1>ValCrown</h1>
+    <p>Gaming Optimizer — Sign in to continue</p>
+  </div>
+
+  <div class="login-form">
+
+    <div id="login-error" class="login-error"></div>
+
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input
+        type="email"
+        id="email"
+        class="form-input"
+        placeholder="you@example.com"
+        autocomplete="email"
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input
+        type="password"
+        id="password"
+        class="form-input"
+        placeholder="••••••••"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <button class="login-btn" id="login-btn" onclick="handleLogin()">
+      Sign In
+    </button>
+
+    <div class="login-footer">
+      Don't have a license? <a href="#" onclick="window.valcrown.openExternal('https://valcrown.com/pricing')">Buy ValCrown</a>
+      <br><br>
+      Need help? <a href="#" onclick="window.valcrown.openExternal('mailto:support@valcrown.com')">support@valcrown.com</a>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/deviceId.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

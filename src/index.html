@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ValCrown</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* Game Detection Card */
+.game-card{background:linear-gradient(135deg,rgba(124,106,255,0.15),rgba(34,212,122,0.08));border:1px solid rgba(124,106,255,0.3);border-radius:var(--r-lg);padding:16px;display:none;align-items:center;gap:14px;margin-bottom:12px;position:relative;overflow:hidden;}
+.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--green));animation:shimmer 2s infinite;}
+@keyframes shimmer{0%{opacity:0.5}50%{opacity:1}100%{opacity:0.5}}
+.gc-icon{font-size:36px;flex-shrink:0;}
+.gc-info{flex:1;}
+.gc-now{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.gc-name{font-size:18px;font-weight:800;letter-spacing:-0.3px;}
+.gc-meta{font-size:11px;color:var(--text2);margin-top:3px;display:flex;align-items:center;gap:8px;}
+.gc-time{font-size:12px;font-weight:700;color:var(--green);font-family:var(--mono);}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 1s infinite;display:inline-block;}
+.no-game-card{background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--r-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:12px;color:var(--text3);font-size:13px;}
+
+/* App grid */
+.app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.app-tile{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;text-align:center;cursor:pointer;transition:all 0.15s;}
+.app-tile:hover{border-color:var(--accent);background:var(--accent-dim);}
+.app-tile.selected{border-color:var(--accent);background:var(--accent-dim);}
+.app-tile-icon{font-size:24px;margin-bottom:6px;}
+.app-tile-name{font-size:12px;font-weight:600;}
+.app-tile-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* Target card */
+.target-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.target-icon{width:40px;height:40px;background:var(--accent);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;}
+.target-name{font-size:14px;font-weight:600;}
+.target-path{font-size:11px;color:var(--text3);margin-top:2px;font-family:var(--mono);}
+.target-actions{margin-left:auto;display:flex;gap:6px;}
+</style>
+<script src="js/gameDb.js"></script><script src="js/bridge.js"></script></head>
+<body>
+
+<div class="titlebar">
+  <div class="tbar-left">
+    <div class="tbar-logo">V</div>
+    <span class="tbar-name">ValCrown</span>
+    <span class="tbar-tag">PRO</span>
+  </div>
+  <div class="tbar-right">
+    <button class="wbtn min" onclick="window.valcrown.minimize()"></button>
+    <button class="wbtn max" onclick="window.valcrown.maximize()"></button>
+    <button class="wbtn close" onclick="window.valcrown.close()"></button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Overview</div>
+      <button class="nav-btn active" onclick="go('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" onclick="go('sessions-pg')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/></svg>
+        Session History
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Optimize</div>
+      <button class="nav-btn" onclick="go('target')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        Target App
+      </button>
+      <button class="nav-btn" onclick="go('boost')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Boost Engine
+      </button>
+      <button class="nav-btn" onclick="go('processes');loadProcs()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Processes
+      </button>
+      <button class="nav-btn" onclick="go('network')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+        Network
+      </button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <button class="nav-btn" onclick="go('ai')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        AI Advisor
+      </button>
+      <button class="nav-btn" onclick="go('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Settings
+      </button>
+    </div>
+    <div class="nav-bottom">
+      <div class="user-pill">
+        <div class="user-av" id="user-av">?</div>
+        <div>
+          <div class="user-nm" id="user-nm">Loading</div>
+          <div class="user-pl" id="user-pl">Pro</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="pg-dashboard" class="page active">
+      <div class="ph">
+        <div class="ph-left"><div class="ph-title">Dashboard</div><div class="ph-sub">ValCrown is monitoring your system in real-time</div></div>
+      </div>
+
+      <!-- Smart Banner -->
+      <div id="smart-banner" style="display:none;margin-bottom:12px;"></div>
+
+      <!-- Game Detection Card -->
+      <div class="game-card" id="game-card">
+        <div class="gc-icon" id="gc-icon">🎮</div>
+        <div class="gc-info">
+          <div class="gc-now"><span class="live-dot"></span>&nbsp; ValCrown is boosting</div>
+          <div class="gc-name" id="gc-name">Game Name</div>
+          <div class="gc-meta">
+            <span id="gc-genre">Gaming</span>
+            <span>·</span>
+            <span class="gc-time" id="session-time">0m 0s</span>
+            <span>·</span>
+            <span id="gc-status">Boosting</span>
+          </div>
+        </div>
+        <button class="btn btn-red btn-sm" onclick="toggleBoost()">Stop Boost</button>
+      </div>
+
+      <!-- No game state -->
+      <div class="no-game-card" id="no-game-card">
+        <span style="font-size:20px;">🎮</span>
+        <span>No game detected — ValCrown monitors 200+ games automatically</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="g4" style="margin-bottom:12px;">
+        <div class="stat" id="st-cpu"><div class="stat-val" id="v-cpu">--</div><div class="stat-lbl">CPU %</div><div class="meter"><div class="meter-fill" id="m-cpu" style="width:0%;background:var(--green)"></div></div></div>
+        <div class="stat" id="st-ram"><div class="stat-val" id="v-ram">--</div><div class="stat-lbl">RAM %</div><div class="meter"><div class="meter-fill" id="m-ram" style="width:0%;background:var(--green)"></div></div></div>
+        <div class="stat info" id="st-ping"><div class="stat-val" id="v-ping">--</div><div class="stat-lbl">Ping ms</div><div class="meter"><div class="meter-fill" id="m-ping" style="width:0%;background:var(--blue)"></div></div></div>
+        <div class="stat" id="st-boost"><div class="stat-val" id="v-boost">OFF</div><div class="stat-lbl">Boost</div><div class="stat-sub" id="v-boost-target">No target</div></div>
+      </div>
+
+      <div class="g2" style="margin-bottom:12px;">
+        <div class="card">
+          <div class="card-head">Quick Boost</div>
+          <button class="boost-btn off" id="dash-boost-btn" onclick="toggleBoost()">Activate Boost</button>
+          <div style="margin-top:8px;font-size:11px;color:var(--text3);" id="dash-target-hint">Set a target app for auto-boost</div>
+        </div>
+        <div class="card">
+          <div class="card-head">System</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text2)">CPU</span><span id="si-cpu" style="font-family:var(--mono);font-size:11px;">--</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text2)">Cores</span><span id="si-cores" style="font-family:var(--mono);font-size:11px;">--</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text2)">RAM</span><span id="si-ram" style="font-family:var(--mono);font-size:11px;">--</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--text2)">Platform</span><span id="si-os" style="font-family:var(--mono);font-size:11px;">--</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="card-head" style="margin:0">Activity Log</div>
+          <button class="btn btn-ghost btn-sm" onclick="clearLog()">Clear</button>
+        </div>
+        <div id="activity-log" style="max-height:140px;overflow-y:auto;"><div class="empty">Activity will appear here</div></div>
+      </div>
+    </div>
+
+    <!-- SESSION HISTORY -->
+    <div id="pg-sessions-pg" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">Session History</div><div class="ph-sub">Games boosted by ValCrown</div></div></div>
+      <div class="card">
+        <div class="card-head">Recent Gaming Sessions</div>
+        <div id="session-history"><div class="empty">No sessions yet — start a game!</div></div>
+      </div>
+    </div>
+
+    <!-- TARGET APP -->
+    <div id="pg-target" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">Target App</div><div class="ph-sub">ValCrown also auto-detects 200+ games — this is for manual targeting</div></div></div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-head">Manual Target (Optional)</div>
+        <div id="no-target" class="drop-zone" onclick="pickApp()">
+          <div class="drop-icon">🎯</div>
+          <div class="drop-title">Drag app here or click to browse</div>
+          <div class="drop-sub">ValCrown already auto-detects most games<br>Use this to manually target a specific app</div>
+          <br>
+          <button class="btn btn-primary" onclick="event.stopPropagation();pickApp()">Browse Files</button>
+        </div>
+        <div id="has-target" style="display:none;">
+          <div class="target-card">
+            <div class="target-icon" id="t-icon">?</div>
+            <div><div class="target-name" id="t-name">--</div><div class="target-path" id="t-path">--</div></div>
+            <div class="target-actions">
+              <button class="btn btn-green btn-sm" onclick="toggleBoost()">Boost Now</button>
+              <button class="btn btn-ghost btn-sm" onclick="pickApp()">Change</button>
+              <button class="btn btn-red btn-sm" onclick="clearTarget()">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head" style="margin-bottom:10px;">Popular Cloud Gaming Apps</div>
+        <div class="app-grid" id="app-grid"></div>
+      </div>
+    </div>
+
+    <!-- BOOST -->
+    <div id="pg-boost" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">Boost Engine</div><div class="ph-sub">Manual boost controls</div></div></div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-head">Boost Control</div>
+        <button class="boost-btn off" id="boost-btn" onclick="toggleBoost()">Activate Boost</button>
+        <div class="g2" style="margin-top:10px;gap:8px;">
+          <div style="background:var(--bg2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Process Priority</div><div style="font-size:14px;font-weight:700;" id="b-priority">Normal</div></div>
+          <div style="background:var(--bg2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Power Plan</div><div style="font-size:14px;font-weight:700;" id="b-power">Balanced</div></div>
+          <div style="background:var(--bg2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">CPU Affinity</div><div style="font-size:14px;font-weight:700;" id="b-affinity">Default</div></div>
+          <div style="background:var(--bg2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border);"><div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px;">Level</div><div style="font-size:14px;font-weight:700;" id="b-level">Off</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div class="card-head" style="margin:0">AI Recommendation</div>
+          <button class="btn btn-primary btn-sm" onclick="getBoostAdvice()">Analyze Now</button>
+        </div>
+        <div id="boost-advice" style="font-size:13px;color:var(--text2);">Click "Analyze Now" for AI-powered boost recommendation based on your system.</div>
+      </div>
+    </div>
+
+    <!-- PROCESSES -->
+    <div id="pg-processes" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">Process Manager</div><div class="ph-sub">AI-checked background process control</div></div></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div class="card-head" style="margin:0">Running Processes</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost btn-sm" onclick="loadProcs()">Refresh</button>
+            <button class="btn btn-primary btn-sm" onclick="aiCheckAll()">AI Check All</button>
+          </div>
+        </div>
+        <div id="proc-list"><div class="empty">Click Refresh to load</div></div>
+      </div>
+    </div>
+
+    <!-- NETWORK -->
+    <div id="pg-network" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">Network Optimizer</div><div class="ph-sub">Monitor and optimize your connection</div></div></div>
+      <div class="g2" style="margin-bottom:12px;">
+        <div class="card">
+          <div class="card-head">Live Ping</div>
+          <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
+            <div class="ping-big" id="n-ping">--</div>
+            <div class="ping-unit">ms</div>
+          </div>
+          <div class="ping-bar"><div id="n-ping-fill" class="ping-fill ping-ok" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <span style="font-size:11px;color:var(--text3)">Quality</span>
+            <span id="n-ping-q" style="font-size:12px;font-weight:600;color:var(--green)">Measuring...</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <button class="btn btn-primary" id="dns-btn" onclick="doFlushDns()" style="width:100%;height:36px;">Flush DNS Cache</button>
+            <button class="btn btn-ghost" onclick="doTcpOpt()" style="width:100%;height:36px;">Optimize TCP Settings</button>
+            <button class="btn btn-ghost" onclick="doNetDiag()" style="width:100%;height:36px;">AI Diagnose Connection</button>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="card-head">AI Network Analysis</div><div id="net-diag" style="font-size:13px;color:var(--text2);">Click "AI Diagnose Connection" above.</div></div>
+    </div>
+
+    <!-- AI -->
+    <div id="pg-ai" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">AI Advisor</div><div class="ph-sub">Claude Sonnet 4.6 + Gemini 2.0 Flash</div></div></div>
+      <div class="card">
+        <div class="card-head">Ask Anything</div>
+        <div class="chat-wrap" id="chat-box">
+          <div class="msg ai">Hi! I'm ValCrown AI. Ask me anything about optimizing your PC, reducing lag, fixing network issues, or gaming performance.</div>
+        </div>
+        <div class="chat-row">
+          <input class="chat-inp" id="chat-in" placeholder="e.g. Why is my ping high? How do I boost GTA V?" onkeypress="if(event.key==='Enter')sendMsg()"/>
+          <button class="btn btn-primary" onclick="sendMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="pg-settings" class="page">
+      <div class="ph"><div class="ph-left"><div class="ph-title">Settings</div><div class="ph-sub">Account and preferences</div></div></div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-head">Account</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
+          <div><div style="font-size:14px;font-weight:600;" id="s-email">--</div><div style="font-size:12px;color:var(--text2);margin-top:2px;" id="s-plan">Pro Plan</div></div>
+          <button class="btn btn-red" onclick="doLogout()">Sign Out</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">About</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text2)">Version</span><span style="font-family:var(--mono);font-size:12px;">1.0.0</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text2)">Backend</span><span style="font-family:var(--mono);font-size:12px;">api.valcrown.com</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text2)">AI</span><span style="font-family:var(--mono);font-size:12px;">Claude Sonnet 4.6</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text2)">Game DB</span><span style="font-family:var(--mono);font-size:12px;">200+ titles</span></div>
+          <div class="div"></div>
+          <div style="display:flex;gap:12px;font-size:12px;">
+            <a href="#" onclick="window.valcrown.openExternal('https://valcrown.com')" style="color:var(--accent);text-decoration:none;">Website</a>
+            <a href="#" onclick="window.valcrown.openExternal('mailto:support@valcrown.com')" style="color:var(--accent);text-decoration:none;">Support</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/deviceId.js"></script>
+<script src="js/gameDb.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
