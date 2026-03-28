@@ -1,0 +1,11 @@
+{
+  "name": "valcrown",
+  "version": "1.0.0",
+  "description": "ValCrown Cloud Gaming Optimizer",
+  "scripts": {
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

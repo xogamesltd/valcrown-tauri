@@ -26,14 +26,14 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
-    "icon": ["icons/icon.ico"],
     "publisher": "XOGAMESLTD",
     "copyright": "Copyright © 2026 XOGAMESLTD",
     "category": "Utility",
+    "icon": ["icons/icon.ico"],
     "windows": {
       "nsis": {
         "languages": ["English"],
-        "installMode": "perMachine"
+        "installMode": "currentUser"
       }
     }
   }
